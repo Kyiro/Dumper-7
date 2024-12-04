@@ -175,7 +175,11 @@ public:
 	};
 
 private:
+#ifdef _WIN64
 	inline static void(*AppendString)(const void*, FString&) = nullptr;
+#else
+	inline static void(*__thiscall AppendString)(const void*, FString&) = nullptr;
+#endif
 
 	inline static std::string(*ToStr)(const void* Name) = nullptr;
 

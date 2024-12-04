@@ -39,7 +39,7 @@ namespace OffsetFinder
 		if (IsBadReadPtr(ObjA) || IsBadReadPtr(ObjB))
 			return OffsetNotFound;
 
-		for (int j = StartingOffset; j <= MaxOffset; j += 0x8)
+		for (int j = StartingOffset; j <= MaxOffset; j += sizeof(void*))
 		{
 			const bool bIsAValid = !IsBadReadPtr(*reinterpret_cast<void* const*>(ObjA + j)) && (bCheckForVft ? !IsBadReadPtr(**reinterpret_cast<void** const*>(ObjA + j)) : true);
 			const bool bIsBValid = !IsBadReadPtr(*reinterpret_cast<void* const*>(ObjB + j)) && (bCheckForVft ? !IsBadReadPtr(**reinterpret_cast<void** const*>(ObjB + j)) : true);
@@ -107,7 +107,7 @@ namespace OffsetFinder
 		Off::UObject::Outer = OffsetNotFound;
 
 		/* Some games move 'Name' before 'Class', so just select the higher one for searching for 'Outer'. */
-		const int32 OuterSearchBase = max(Off::UObject::Name, Off::UObject::Class) + 0x8;
+		const int32 OuterSearchBase = max(Off::UObject::Name, Off::UObject::Class) + sizeof(void*);
 
 		// loop a few times in case we accidentally choose a UPackage (which doesn't have an Outer) to find Outer
 		while (Off::UObject::Outer == OffsetNotFound)
@@ -302,7 +302,7 @@ namespace OffsetFinder
 		const uint8_t* KismetSystemLibraryChild = reinterpret_cast<uint8_t*>(ObjectArray::FindObjectFast<UEStruct>("KismetSystemLibrary").GetChild().GetAddress());
 		const uint8_t* KismetStringLibraryChild = reinterpret_cast<uint8_t*>(ObjectArray::FindObjectFast<UEStruct>("KismetStringLibrary").GetChild().GetAddress());
 
-		return GetValidPointerOffset(KismetSystemLibraryChild, KismetStringLibraryChild, Off::UObject::Outer + 0x08, 0x60);
+		return GetValidPointerOffset(KismetSystemLibraryChild, KismetStringLibraryChild, Off::UObject::Outer + sizeof(void*), 0x60);
 	}
 
 	/* FField */
@@ -311,7 +311,7 @@ namespace OffsetFinder
 		const uint8_t* GuidChildren   = reinterpret_cast<uint8_t*>(ObjectArray::FindObjectFast<UEStruct>("Guid").GetChildProperties().GetAddress());
 		const uint8_t* VectorChildren = reinterpret_cast<uint8_t*>(ObjectArray::FindObjectFast<UEStruct>("Vector").GetChildProperties().GetAddress());
 
-		return GetValidPointerOffset(GuidChildren, VectorChildren, Off::FField::Owner + 0x8, 0x48);
+		return GetValidPointerOffset(GuidChildren, VectorChildren, Off::FField::Owner + sizeof(void*), 0x48);
 	}
 
 	inline int32_t FindFFieldNameOffset()
@@ -412,7 +412,7 @@ namespace OffsetFinder
 		uint8* ObjA = (uint8*)ObjectArray::FindObjectFast("Color").GetAddress();
 		uint8* ObjB = (uint8*)ObjectArray::FindObjectFast("Guid").GetAddress();
 
-		return GetValidPointerOffset(ObjA, ObjB, Off::UStruct::Children + 0x08, 0x80);
+		return GetValidPointerOffset(ObjA, ObjB, Off::UStruct::Children + sizeof(void*), 0x80);
 	}
 
 	inline int32_t FindStructSizeOffset()
@@ -620,7 +620,7 @@ namespace OffsetFinder
 			void* AddressToCheck = *reinterpret_cast<void**>(reinterpret_cast<uint8*>(Property.GetAddress()) + PropertySize);
 
 			if (IsBadReadPtr(AddressToCheck))
-				return PropertySize + 0x8;
+				return PropertySize + sizeof(void*);
 		}
 
 		return PropertySize;
@@ -637,7 +637,7 @@ namespace OffsetFinder
 			void* AddressToCheck = *(void**)((uint8*)Object.GetAddress() + PropertySize);
 
 			if (IsBadReadPtr(AddressToCheck))
-				return PropertySize + 0x8;
+				return PropertySize + sizeof(void*);
 		}
 
 		return PropertySize;
@@ -654,7 +654,7 @@ namespace OffsetFinder
 			void* AddressToCheck = *(void**)((uint8*)Object.GetAddress() + PropertySize);
 
 			if (IsBadReadPtr(AddressToCheck))
-				return PropertySize + 0x8;
+				return PropertySize + sizeof(void*);
 		}
 
 		return PropertySize;
@@ -694,7 +694,7 @@ namespace OffsetFinder
 		int32 SearchStart = ObjectArray::FindClassFast("Object").GetStructSize() + ObjectArray::FindObjectFast<UEStruct>("URL", EClassCastFlags::Struct).GetStructSize();
 		int32 SearchEnd = Level.GetClass().FindMember("OwningWorld").GetOffset();
 
-		for (int i = SearchStart; i <= (SearchEnd - 0x10); i += 8)
+		for (int i = SearchStart; i <= (SearchEnd - 0x10); i += sizeof(void*))
 		{
 			const TArray<void*>& ActorArray = *reinterpret_cast<TArray<void*>*>(Lvl + i);
 
@@ -713,8 +713,8 @@ namespace OffsetFinder
 	{
 		const UEClass DataTable = ObjectArray::FindClassFast("DataTable");
 
-		constexpr int32 UObjectOuterSize = 0x8;
-		constexpr int32 RowStructSize = 0x8;
+		constexpr int32 UObjectOuterSize = sizeof(void*);
+		constexpr int32 RowStructSize = sizeof(void*);
 
 		if (!DataTable)
 		{
