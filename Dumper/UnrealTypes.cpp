@@ -79,7 +79,7 @@ void FName::Init(bool bForceGNames)
 	int i = 0;
 	while (!AppendString && i < PossibleSigs.size())
 	{
-		AppendString = static_cast<void(*)(const void*, FString&)>(StringRef.RelativePattern(PossibleSigs[i], 0x50, -1 /* auto */));
+		AppendString = static_cast<decltype(AppendString)>(StringRef.RelativePattern(PossibleSigs[i], 0x50, -1 /* auto */));
 
 		i++;
 	}
@@ -158,7 +158,7 @@ void FName::Init(int32 OverrideOffset, EOffsetOverrideType OverrideType, bool bI
 		return;
 	}
 
-	AppendString = reinterpret_cast<void(*)(const void*, FString&)>(GetModuleBase(ModuleName) + OverrideOffset);
+	AppendString = reinterpret_cast<decltype(AppendString)>(GetModuleBase(ModuleName) + OverrideOffset);
 
 	Off::InSDK::Name::AppendNameToString = OverrideOffset;
 	Off::InSDK::Name::bIsUsingAppendStringOverToString = OverrideType == EOffsetOverrideType::AppendString;
@@ -194,7 +194,7 @@ void FName::InitFallback()
 	int i = 0;
 	while (!AppendString && i < PossibleSigs.size())
 	{
-		AppendString = static_cast<void(*)(const void*, FString&)>(Conv_NameToStringAddress.RelativePattern(PossibleSigs[i], 0x90, -1 /* auto */));
+		AppendString = static_cast<decltype(AppendString)>(Conv_NameToStringAddress.RelativePattern(PossibleSigs[i], 0x90, -1 /* auto */));
 
 		i++;
 	}

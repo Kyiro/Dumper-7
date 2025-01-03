@@ -16,9 +16,15 @@ constexpr inline std::array FFixedUObjectArrayLayouts =
 {
 	FFixedUObjectArrayLayout // Default UE4.11 - UE4.20
 	{
+#ifdef _WIN64
 		.ObjectsOffset = 0x0,
 		.MaxObjectsOffset = 0x8,
 		.NumObjectsOffset = 0xC
+#else
+		.ObjectsOffset = 0x0,
+		.MaxObjectsOffset = 0x4,
+		.NumObjectsOffset = 0x8
+#endif
 	}
 };
 
@@ -157,10 +163,14 @@ void ObjectArray::InitializeFUObjectItem(uint8_t* FirstItemPtr)
 		}
 	}
 
-	for (int i = FUObjectItemInitialOffset + 0x8; i <= 0x38; i += 4)
+	for (int i = FUObjectItemInitialOffset + sizeof(void*); i <= 0x38; i += 4)
 	{
 		void* SecondObject = *reinterpret_cast<uint8**>(FirstItemPtr + i);
-		void* ThirdObject  = *reinterpret_cast<uint8**>(FirstItemPtr + (i * 2) - FUObjectItemInitialOffset);
+#ifdef _WIN64
+		void* ThirdObject = *reinterpret_cast<uint8**>(FirstItemPtr + (i * 2) - FUObjectItemInitialOffset);
+#else
+		void* ThirdObject = *reinterpret_cast<uint8**>(FirstItemPtr + i - FUObjectItemInitialOffset);
+#endif
 
 		if (!IsBadReadPtr(SecondObject) && !IsBadReadPtr(*reinterpret_cast<void**>(SecondObject)) && !IsBadReadPtr(ThirdObject) && !IsBadReadPtr(*reinterpret_cast<void**>(ThirdObject)))
 		{

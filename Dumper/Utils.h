@@ -148,7 +148,9 @@ struct PEB
 			BOOLEAN SpareBits : 1;
 		};
 	};
-	BYTE ManuallyAddedPaddingCauseTheCompilerIsStupid[0x4]; // It doesn't 0x8 byte align the pointers properly 
+#ifdef _WIN64
+	BYTE ManuallyAddedPaddingCauseTheCompilerIsStupid[0x4]; // It doesn't 0x8 byte align the pointers properly
+#endif
 	HANDLE Mutant;
 	PVOID ImageBaseAddress;
 	PEB_LDR_DATA* Ldr;
@@ -181,7 +183,11 @@ struct LDR_DATA_TABLE_ENTRY
 
 inline _TEB* _NtCurrentTeb()
 {
+#if _WIN64
 	return reinterpret_cast<struct _TEB*>(__readgsqword(((LONG)__builtin_offsetof(NT_TIB, Self))));
+#else
+	return reinterpret_cast<struct _TEB*>(__readfsdword(((LONG)__builtin_offsetof(NT_TIB, Self))));
+#endif
 }
 
 inline PEB* GetPEB()

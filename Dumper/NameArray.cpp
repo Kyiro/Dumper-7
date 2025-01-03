@@ -147,7 +147,7 @@ bool NameArray::InitializeNameArray(uint8_t* NameArray)
 	if (!NameArray || IsBadReadPtr(NameArray))
 		return false;
 
-	for (int i = 0; i < 0x800; i += 0x8)
+	for (int i = 0; i < 0x800; i += sizeof(void*))
 	{
 		uint8_t* SomePtr = *reinterpret_cast<uint8_t**>(NameArray + i);
 
